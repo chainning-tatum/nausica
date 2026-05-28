@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #1a1814;
+  --ink-muted: #6b6560;
+  --ink-faint: #b8b3ae;
+  --paper: #f9f7f4;
+  --paper-warm: #f2ede6;
+  --paper-border: #e8e2d9;
+  --accent: #c4703a;
+  --accent-soft: #f0e4d8;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  background: var(--paper);
+  min-height: 100vh;
+}
+
+.font-serif { font-family: 'Lora', serif; }
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+textarea {
+  font-family: 'Lora', serif;
+  resize: none;
+  outline: none;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  line-height: 1.8;
+}
+
+textarea::placeholder { color: var(--ink-faint); font-style: italic; }
+
+.entry-card {
+  border-bottom: 1px solid var(--paper-border);
+  transition: background 0.15s;
+}
+.entry-card:hover { background: var(--paper-warm); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.4s ease forwards; }
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.saving { animation: pulse-soft 1.5s ease infinite; }
