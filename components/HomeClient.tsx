@@ -88,6 +88,12 @@ export default function HomeClient({ user, prompt, userEntry, publicEntries: ini
         </span>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
           <span style={{ fontSize: '13px', color: 'var(--ink-muted)' }}>{today}</span>
+          {user && (
+            <>
+              <a href="/journal" style={{ fontSize: '13px', color: 'var(--ink-muted)', textDecoration: 'none' }}>Journal</a>
+              <a href="/community" style={{ fontSize: '13px', color: 'var(--ink-muted)', textDecoration: 'none' }}>Community</a>
+            </>
+          )}
           {user ? (
             <button
               onClick={() => supabase.auth.signOut().then(() => window.location.reload())}
