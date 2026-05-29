@@ -26,6 +26,14 @@ export default function HomeClient({ user, prompt, userEntry, publicEntries: ini
   const [expandedEntry, setExpandedEntry] = useState<string | null>(null)
   const supabase = createClient()
 
+  // Force reload after OAuth callback to pick up session
+  useEffect(() => {
+    if (window.location.search.includes('auth=success')) {
+      window.history.replaceState({}, '', '/')
+      window.location.reload()
+    }
+  }, [])
+
   useEffect(() => {
     const words = content.trim() ? content.trim().split(/\s+/).length : 0
     setWordCount(words)
