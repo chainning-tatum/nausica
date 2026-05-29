@@ -26,13 +26,15 @@ export default function HomeClient({ user, prompt, userEntry, publicEntries: ini
   const [expandedEntry, setExpandedEntry] = useState<string | null>(null)
   const supabase = createClient()
 
-  // Force reload after OAuth callback to pick up session
+  // Listen for auth state changes and reload to pick up server session
   useEffect(() => {
-    if (window.location.search.includes('auth=success')) {
-      window.history.replaceState({}, '', '/')
-      window.location.reload()
-    }
-  }, [])
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN') {
+        window.location.href = '/'
+      }
+    })
+    return () => subscription.unsubscribe()
+  }, [supabase])
 
   useEffect(() => {
     const words = content.trim() ? content.trim().split(/\s+/).length : 0
@@ -186,7 +188,7 @@ export default function HomeClient({ user, prompt, userEntry, publicEntries: ini
                 </div>
                 <p style={{ fontSize: '13px', color: 'var(--ink-muted)', textAlign: 'center' }}>
                   <button onClick={() => setShowAuth(true)} style={{ color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '13px' }}>
-                    Sign in with your email
+                    Sign in
                   </button>
                   {' '}to save your entry and read others.
                 </p>
