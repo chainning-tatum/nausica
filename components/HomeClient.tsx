@@ -26,15 +26,17 @@ export default function HomeClient({ user, prompt, userEntry, publicEntries: ini
   const [expandedEntry, setExpandedEntry] = useState<string | null>(null)
   const supabase = createClient()
 
-  // Listen for auth state changes and reload to pick up server session
+  // Listen for auth state changes - only redirect once on SIGNED_IN
   useEffect(() => {
+    let redirected = false
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN') {
+      if (event === 'SIGNED_IN' && !redirected && !user) {
+        redirected = true
         window.location.href = '/'
       }
     })
     return () => subscription.unsubscribe()
-  }, [supabase])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const words = content.trim() ? content.trim().split(/\s+/).length : 0
@@ -69,7 +71,7 @@ export default function HomeClient({ user, prompt, userEntry, publicEntries: ini
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
 
   const visibilityOptions: { value: Visibility; label: string; desc: string }[] = [
-    { value: 'private', label: 'Private', desc: 'Only you' },
+    { value: 'private', label: 'Journal', desc: 'Only you' },
     { value: 'community', label: 'Community', desc: 'Shared anonymously' },
   ]
 
@@ -186,12 +188,6 @@ export default function HomeClient({ user, prompt, userEntry, publicEntries: ini
                     Start writing here...
                   </p>
                 </div>
-                <p style={{ fontSize: '13px', color: 'var(--ink-muted)', textAlign: 'center' }}>
-                  <button onClick={() => setShowAuth(true)} style={{ color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline', fontSize: '13px' }}>
-                    Sign in
-                  </button>
-                  {' '}to save your entry and read others.
-                </p>
               </div>
             ) : (
               // Writing experience
