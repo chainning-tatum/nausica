@@ -4,20 +4,17 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function AuthModal({ onClose }: { onClose: () => void }) {
-  const [email, setEmail] = useState('')
-  const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
   const supabase = createClient()
 
-  const handleSubmit = async () => {
-    if (!email.trim()) return
+  const handleGoogle = async () => {
     setLoading(true)
-    await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin },
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
     })
-    setSent(true)
-    setLoading(false)
   }
 
   return (
@@ -37,76 +34,50 @@ export default function AuthModal({ onClose }: { onClose: () => void }) {
           borderRadius: '12px',
           padding: '2.5rem',
           width: '100%',
-          maxWidth: '400px',
+          maxWidth: '380px',
           border: '1px solid var(--paper-border)',
+          textAlign: 'center',
         }}
       >
-        {!sent ? (
-          <>
-            <h2 style={{ fontFamily: 'Lora, serif', fontSize: '22px', marginBottom: '0.5rem', color: 'var(--ink)' }}>
-              Start writing
-            </h2>
-            <p style={{ fontSize: '14px', color: 'var(--ink-muted)', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-              Enter your email and we'll send you a magic link — no password needed.
-            </p>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-              placeholder="your@email.com"
-              autoFocus
-              style={{
-                width: '100%',
-                padding: '10px 14px',
-                fontSize: '15px',
-                border: '1px solid var(--paper-border)',
-                borderRadius: '6px',
-                background: 'var(--paper-warm)',
-                color: 'var(--ink)',
-                marginBottom: '0.75rem',
-                fontFamily: 'DM Sans, sans-serif',
-              }}
-            />
-            <button
-              onClick={handleSubmit}
-              disabled={loading || !email.trim()}
-              style={{
-                width: '100%',
-                padding: '11px',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: 500,
-                border: 'none',
-                cursor: email.trim() && !loading ? 'pointer' : 'default',
-                background: email.trim() ? 'var(--ink)' : 'var(--paper-border)',
-                color: email.trim() ? 'var(--paper)' : 'var(--ink-faint)',
-                transition: 'all 0.15s',
-              }}
-            >
-              {loading ? 'Sending…' : 'Send magic link'}
-            </button>
-            <p style={{ fontSize: '12px', color: 'var(--ink-faint)', marginTop: '1rem', textAlign: 'center' }}>
-              No account needed — signing in creates one automatically.
-            </p>
-          </>
-        ) : (
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '32px', marginBottom: '1rem' }}>✉️</div>
-            <h2 style={{ fontFamily: 'Lora, serif', fontSize: '20px', marginBottom: '0.5rem', color: 'var(--ink)' }}>
-              Check your inbox
-            </h2>
-            <p style={{ fontSize: '14px', color: 'var(--ink-muted)', lineHeight: 1.6 }}>
-              We sent a magic link to <strong>{email}</strong>. Click it to sign in and start writing.
-            </p>
-            <button
-              onClick={onClose}
-              style={{ marginTop: '1.5rem', fontSize: '13px', color: 'var(--ink-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
-            >
-              Close
-            </button>
-          </div>
-        )}
+        <h2 style={{ fontFamily: 'Lora, serif', fontSize: '22px', marginBottom: '0.5rem', color: 'var(--ink)', fontWeight: 400 }}>
+          Start writing
+        </h2>
+        <p style={{ fontSize: '14px', color: 'var(--ink-muted)', marginBottom: '2rem', lineHeight: 1.6 }}>
+          Sign in to save your entries and read the community.
+        </p>
+
+        <button
+          onClick={handleGoogle}
+          disabled={loading}
+          style={{
+            width: '100%',
+            padding: '12px',
+            borderRadius: '8px',
+            fontSize: '14px',
+            fontWeight: 500,
+            border: '1px solid var(--paper-border)',
+            cursor: 'pointer',
+            background: 'var(--paper-warm)',
+            color: 'var(--ink)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '10px',
+            transition: 'all 0.15s',
+          }}
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+            <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+            <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+          </svg>
+          {loading ? 'Redirecting…' : 'Continue with Google'}
+        </button>
+
+        <p style={{ fontSize: '12px', color: 'var(--ink-faint)', marginTop: '1.5rem' }}>
+          No password needed. Your journal is private by default.
+        </p>
       </div>
     </div>
   )
