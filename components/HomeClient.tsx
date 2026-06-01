@@ -300,7 +300,10 @@ export default function HomeClient({ user, prompt, userEntry, publicEntries: ini
       <footer style={{ borderTop: '1px solid var(--paper-border)', padding: '1.5rem 2rem', marginTop: '4rem' }}>
         <div style={{ maxWidth: '680px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: '12px', color: 'var(--ink-faint)' }}>© 2026 nausica</span>
-          <a href="/privacy" style={{ fontSize: '12px', color: 'var(--ink-faint)', textDecoration: 'none' }}>Privacy Policy</a>
+          <div style={{ display: 'flex', gap: '1.5rem' }}>
+            <a href="/privacy" style={{ fontSize: '12px', color: 'var(--ink-faint)', textDecoration: 'none' }}>Privacy</a>
+            <a href="/terms" style={{ fontSize: '12px', color: 'var(--ink-faint)', textDecoration: 'none' }}>Terms</a>
+          </div>
         </div>
       </footer>
 
