@@ -95,13 +95,7 @@ export default function HomeClient({ user, prompt, userEntry, publicEntries: ini
         background: 'var(--paper)',
         zIndex: 10,
       }}>
-        <a href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <svg width="24" height="10" viewBox="0 0 112 44" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="56" cy="22" rx="56" ry="22" fill="none" stroke="#c4703a" strokeWidth="2.5"/>
-            <ellipse cx="56" cy="22" rx="38" ry="15" fill="none" stroke="#c4703a" strokeWidth="1.8" opacity="0.65"/>
-            <ellipse cx="56" cy="22" rx="20" ry="8" fill="none" stroke="#c4703a" strokeWidth="1.2" opacity="0.35"/>
-            <ellipse cx="56" cy="22" rx="6" ry="2.5" fill="#c4703a" opacity="0.5"/>
-          </svg>
+        <a href="/" style={{ textDecoration: 'none' }}>
           <span style={{ fontFamily: 'Lora, serif', fontSize: '20px', letterSpacing: '-0.02em', color: 'var(--ink)', fontStyle: 'italic' }}>
             nausica
           </span>
@@ -229,7 +223,8 @@ export default function HomeClient({ user, prompt, userEntry, publicEntries: ini
                         onClick={() => setVisibility(opt.value)}
                         title={opt.desc}
                         style={{
-                          padding: '6px 12px',
+                          width: '100px',
+                          padding: '6px 0',
                           borderRadius: '99px',
                           fontSize: '12px',
                           border: '1px solid',
@@ -239,6 +234,7 @@ export default function HomeClient({ user, prompt, userEntry, publicEntries: ini
                           color: visibility === opt.value ? 'var(--accent)' : 'var(--ink-muted)',
                           fontWeight: visibility === opt.value ? 500 : 300,
                           transition: 'all 0.15s',
+                          textAlign: 'center',
                         }}
                       >
                         {opt.label}
