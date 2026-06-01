@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import AuthModal from './AuthModal'
+import Header from './Header'
 
 type Visibility = 'private' | 'community'
 
@@ -82,49 +83,7 @@ export default function HomeClient({ user, prompt, userEntry, publicEntries: ini
 
   return (
     <div style={{ background: 'var(--paper)', minHeight: '100vh' }}>
-      {/* Header */}
-      <header style={{
-        borderBottom: '1px solid var(--paper-border)',
-        padding: '0 2rem',
-        height: '56px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        position: 'sticky',
-        top: 0,
-        background: 'var(--paper)',
-        zIndex: 10,
-      }}>
-        <a href="/" style={{ textDecoration: 'none' }}>
-          <span style={{ fontFamily: 'Lora, serif', fontSize: '20px', letterSpacing: '-0.02em', color: 'var(--ink)', fontStyle: 'italic' }}>
-            nausica
-          </span>
-        </a>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <span style={{ fontSize: '13px', color: 'var(--ink-muted)' }}>{today}</span>
-          {user && (
-            <>
-              <a href="/journal" style={{ fontSize: '13px', color: 'var(--ink-muted)', textDecoration: 'none' }}>Journal</a>
-              <a href="/community" style={{ fontSize: '13px', color: 'var(--ink-muted)', textDecoration: 'none' }}>Community</a>
-            </>
-          )}
-          {user ? (
-            <button
-              onClick={() => supabase.auth.signOut().then(() => window.location.reload())}
-              style={{ fontSize: '13px', color: 'var(--ink-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
-            >
-              sign out
-            </button>
-          ) : (
-            <button
-              onClick={() => setShowAuth(true)}
-              style={{ fontSize: '13px', color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}
-            >
-              sign in
-            </button>
-          )}
-        </div>
-      </header>
+      <Header user={user} activePage="home" onSignIn={() => setShowAuth(true)} />
 
       {/* Tab bar */}
       <div style={{
@@ -337,6 +296,13 @@ export default function HomeClient({ user, prompt, userEntry, publicEntries: ini
           </div>
         )}
       </main>
+
+      <footer style={{ borderTop: '1px solid var(--paper-border)', padding: '1.5rem 2rem', marginTop: '4rem' }}>
+        <div style={{ maxWidth: '680px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '12px', color: 'var(--ink-faint)' }}>© 2026 nausica</span>
+          <a href="/privacy" style={{ fontSize: '12px', color: 'var(--ink-faint)', textDecoration: 'none' }}>Privacy Policy</a>
+        </div>
+      </footer>
 
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </div>
