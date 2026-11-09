@@ -289,7 +289,11 @@ def q(v):
         return f"'{v.isoformat()}'::date"
     if isinstance(v, (dict, list)):
         return "'" + json.dumps(v).replace("'", "''") + "'::jsonb"
-    return "'" + str(v).replace("'", "''") + "'"
+    s = str(v)
+    if "\n" in s or "\\" in s:
+        # keep every literal on one line so nothing can split it mid-string
+        return "E'" + s.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n") + "'"
+    return "'" + s.replace("'", "''") + "'"
 
 
 def values(rows, cols):
