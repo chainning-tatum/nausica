@@ -427,13 +427,14 @@ end $$;
     cols = list(ids[0])
     stmts.append(f"insert into auth.identities ({', '.join(cols)}) values\n  " + values(ids, cols) + ";\n")
 
-    ecols = ["id", "user_id", "d", "content", "visibility", "word_count", "created_at", "updated_at"]
+    # word_count is a generated column in the database, so it is never inserted
+    ecols = ["id", "user_id", "d", "content", "visibility", "created_at", "updated_at"]
     E = d["entries"]
     for i in range(0, len(E), 300):
         stmts.append(
-            "insert into public.entries (id, user_id, prompt_id, content, visibility, word_count, created_at, updated_at)\n"
-            "select v.id::uuid, v.user_id::uuid, p.id, v.content, v.visibility, v.word_count, v.created_at, v.updated_at\n"
-            f"from (values\n  {values(E[i:i + 300], ecols)}\n) as v(id, user_id, d, content, visibility, word_count, created_at, updated_at)\n"
+            "insert into public.entries (id, user_id, prompt_id, content, visibility, created_at, updated_at)\n"
+            "select v.id::uuid, v.user_id::uuid, p.id, v.content, v.visibility, v.created_at, v.updated_at\n"
+            f"from (values\n  {values(E[i:i + 300], ecols)}\n) as v(id, user_id, d, content, visibility, created_at, updated_at)\n"
             "join public.prompts p on p.date = v.d;\n")
     stmts.append(f"""select (select count(*) from auth.users where raw_app_meta_data->>'seed' = '{SEED_TAG}') as test_users,
        (select count(*) from public.entries e join auth.users u on u.id = e.user_id
