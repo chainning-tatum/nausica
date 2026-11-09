@@ -2,8 +2,8 @@
 """
 Generate realistic, messy test data for Nausica.
 
-Writes seed/seed_partN_of_M.sql and seed/cleanup.sql. Paste each part into the
-Supabase SQL Editor in order. cleanup.sql removes the test users and their
+Writes seed/seed_partN_of_M.sql and seed/nausica_cleanup.sql. Paste each part into the
+Supabase SQL Editor in order. nausica_cleanup.sql removes the test users and their
 entries (prompts are kept: the app needs one per day anyway).
 
 Test users are Gmail plus-addresses on OWNER_EMAIL, so magic-link logins for
@@ -276,7 +276,15 @@ def word_count(text):
 
 
 # ---------------------------------------------------------------- helpers
+class Text(str):
+    """Free text (entries, prompts). Written as base64 so no quote or line break
+    in the text can ever be misread by the SQL Editor; Postgres decodes it."""
+
+
 def q(v):
+    if isinstance(v, Text):
+        import base64
+        return "convert_from(decode('" + base64.b64encode(v.encode()).decode() + "', 'base64'), 'UTF8')"
     if v is None:
         return "null"
     if isinstance(v, bool):
@@ -330,7 +338,7 @@ def build(n_users, seed):
     all_days = list(days(FIRST_DAY, PROMPTS_UNTIL))
     texts = PROMPTS[:]
     rng.shuffle(texts)
-    prompts = [{"date": d, "text": texts[i % len(texts)]} for i, d in enumerate(all_days)]
+    prompts = [{"date": d, "text": Text(texts[i % len(texts)])} for i, d in enumerate(all_days)]
     ptext = {p["date"]: p["text"] for p in prompts}
 
     names = set()
@@ -391,7 +399,7 @@ def build(n_users, seed):
             updated = created + (timedelta(minutes=rng.randint(1, 600)) if rng.random() < 0.2 else timedelta(seconds=rng.randint(3, 40)))
             entries.append({
                 "id": str(uuid.UUID(int=rng.getrandbits(128), version=4)), "user_id": uid, "d": d,
-                "content": text, "visibility": "community" if rng.random() < share and len(text) > 15 else "private",
+                "content": Text(text), "visibility": "community" if rng.random() < share and len(text) > 15 else "private",
                 "word_count": word_count(text), "created_at": created, "updated_at": min(updated, NOW),
             })
     return dict(prompts=prompts, users=users, entries=entries, pw_hash=pw_hash)
@@ -408,14 +416,14 @@ def render(d, limit=450_000):
     stmts = []
     stmts.append(f"""do $$ begin
   if exists (select 1 from auth.users where raw_app_meta_data->>'seed' = '{SEED_TAG}') then
-    raise exception 'Test data is already loaded. Run cleanup.sql first.';
+    raise exception 'Test data is already loaded. Run nausica_cleanup.sql first.';
   end if;
 end $$;
 """)
     stmts.append("-- Prompts for every missing day\ninsert into public.prompts (date, text) values\n  "
                  + values(d["prompts"], ["date", "text"]) + "\non conflict (date) do nothing;\n")
     au = [{"instance_id": "00000000-0000-0000-0000-000000000000", "id": u["id"], "aud": "authenticated",
-           "role": "authenticated", "email": u["email"], "encrypted_password": d["pw_hash"],
+           "role": "authenticated", "email": u["email"], "encrypted_password": Text(d["pw_hash"]),
            "email_confirmed_at": u["created"], "last_sign_in_at": u["created"],
            "raw_app_meta_data": {"provider": "email", "providers": ["email"], "seed": SEED_TAG},
            "raw_user_meta_data": {}, "created_at": u["created"], "updated_at": u["created"],
@@ -454,7 +462,7 @@ end $$;
     groups.append(cur)
     n = len(groups)
     return [header + f"-- PART {i} OF {n}. Run the parts in order.\n"
-            + ("" if i == 1 else "-- If an earlier part failed, run cleanup.sql and start again from part 1.\n")
+            + ("" if i == 1 else "-- If an earlier part failed, run nausica_cleanup.sql and start again from part 1.\n")
             + "\nbegin;\n\n" + g + "commit;\n" for i, g in enumerate(groups, 1)]
 
 
@@ -488,7 +496,7 @@ def main():
     parts = render(d)
     for i, p in enumerate(parts, 1):
         (here / f"seed_part{i}_of_{len(parts)}.sql").write_text(p)
-    (here / "cleanup.sql").write_text(CLEANUP)
+    (here / "nausica_cleanup.sql").write_text(CLEANUP)
 
     E = d["entries"]
     print(f"users {len(d['users'])}  entries {len(E)}  prompts {len(d['prompts'])}  parts {len(parts)}")
